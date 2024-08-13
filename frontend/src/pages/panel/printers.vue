@@ -32,7 +32,7 @@
             <v-btn color="primary" @click="dialog = true">Open Edit Material</v-btn>
 
             <!-- Dialog -->
-            <v-dialog v-model="dialog" max-width="600">
+            <v-dialog v-model="dialog" max-width="600" inverted>
               <v-card class="pa-4">
                 <v-card-title>
                   <v-btn @click="back" icon="mdi-arrow-left" class="mr-1"/>
@@ -44,7 +44,7 @@
                   <v-form>
                     <h6 class="text-center mb-0 font-weight-bold" style="font-size: 18px;">Assign specific spool</h6>
                     <v-btn-toggle>
-                      <v-btn outlined color="primary">
+                      <v-btn outlined color="primary" icon="mdi-package-variant-closed">
                         <v-icon>mdi-package-variant-closed</v-icon>
                         Pick new spool
                       </v-btn>
@@ -56,7 +56,7 @@
                     <v-select :items="materialTypes" label="Material type" v-model="selectedMaterial" outlined/>
 
                     <!-- Color Selection -->
-                    <v-color-picker v-model="selectedColor" mode="hexa"></v-color-picker>
+                    <v-color-picker v-model="selectedColor" mode="hexa"/>
 
                     <!-- Save Button -->
                     <v-btn block outlined color="primary" class="mt-2" :disabled="!canSave">Save material data</v-btn>
@@ -183,27 +183,9 @@ export default {
 </script>
 
 <style scoped>
-.v-card {
-  margin-bottom: 16px;
-}
 
 .v-btn {
-  border-radius: 4px !important; /* Adjust the button radius to make them rectangular */
+  border-radius: 4px
 }
 
-.v-row > .v-col {
-  padding: 0 4px; /* Adjust spacing between buttons */
-}
-
-.v-card-title {
-  font-size: 1.2rem;
-}
-
-.v-card-title .text-center {
-  margin: 0 auto;
-}
-
-.pointer {
-  cursor: pointer;
-}
 </style>
