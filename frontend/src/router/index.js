@@ -5,10 +5,9 @@
  */
 
 // Composables
-import {createRouter, createWebHistory} from 'vue-router/auto'
-import {setupLayouts} from 'virtual:generated-layouts'
-import {routes} from 'vue-router/auto-routes'
-
+import {createRouter, createWebHistory} from 'vue-router/auto';
+import {setupLayouts} from 'virtual:generated-layouts';
+import {routes} from 'vue-router/auto-routes';
 
 // Function to modify routes
 // Used to set specific layout if default is not used
@@ -21,10 +20,20 @@ function modifyRoutes(routes) {
   });
 }
 
+// Add the 404 route
+const modifiedRoutes = modifyRoutes(routes);
+modifiedRoutes.push({
+  path: '/:catchAll(.*)',
+  component: () => import('@/components/404.vue'),
+  meta: {
+    layout: 'minimal'
+  },
+});
+
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
-  routes: setupLayouts(modifyRoutes(routes)),
-})
+  routes: setupLayouts(modifiedRoutes),
+});
 
 // Workaround for https://github.com/vitejs/vite/issues/11804
 router.onError((err, to) => {

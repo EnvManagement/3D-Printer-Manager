@@ -3,123 +3,123 @@
     <!-- Header -->
     <v-row>
       <v-col cols="12">
-        <v-toolbar dense flat>
-          <v-toolbar-title>Your Files</v-toolbar-title>
-          <v-spacer></v-spacer>
-          <v-text-field
-            v-model="search"
-            append-icon="mdi-magnify"
-            label="Search for a file"
-            single-line
-            hide-details
-          ></v-text-field>
-          <v-btn icon @click="toggleFilter">
-            <v-icon>mdi-dots-vertical</v-icon>
-          </v-btn>
-          <v-menu v-model="filterVisible" offset-y>
-            <v-card>
-              <v-card-title>Filter files</v-card-title>
-              <v-card-text>
-                <v-combobox
-                  v-model="selectedPrinters"
-                  :items="printers"
-                  label="Select printers"
-                  multiple
-                ></v-combobox>
-                <v-checkbox v-model="filterGCODE" label="GCODE"></v-checkbox>
-                <v-checkbox v-model="filterSTL" label="STL"></v-checkbox>
-                <v-checkbox v-model="filter3MF" label="3MF"></v-checkbox>
-                <v-checkbox v-model="filterOBJ" label="OBJ"></v-checkbox>
-                <v-select
-                  v-model="selectedMaterial"
-                  :items="materials"
-                  label="Material"
-                ></v-select>
-                <v-select
-                  v-model="selectedSlicer"
-                  :items="slicers"
-                  label="Slicer"
-                ></v-select>
-              </v-card-text>
+        <v-card flat>
+          <v-card-title class="d-flex justify-content-between align-items-center">
+            <span style="font-size: 2rem">Your Files</span>
+            <v-spacer/>
+            <div>
+              <v-btn icon="mdi-upload"/>
+              <v-btn icon="mdi-folder-plus"/>
+              <v-btn :icon="gridView ? 'mdi-view-list' : 'mdi-view-grid'" @click="gridView = !gridView"/>
+            </div>
+          </v-card-title>
+          <v-text-field v-model="search" label="Search for a file" prepend-inner-icon="mdi-magnify"
+                        style="margin: 0 1rem">
+            <template v-slot:append-inner>
+              <v-btn icon="mdi-filter" @click="filter.visible = !filter.visible"/>
+            </template>
+          </v-text-field>
+
+          <!-- Filter Section -->
+          <v-expand-transition>
+            <v-card v-if="filter.visible" flat class="pa-3">
+              <v-row>
+                <v-col cols="8">
+                  <v-select v-model="filter.printers" :items="printers" label="Select printers" multiple chips/>
+                </v-col>
+                <v-col cols="1">
+                  <v-checkbox v-model="filter.GCODE" label="GCODE"/>
+                </v-col>
+                <v-col cols="1">
+                  <v-checkbox v-model="filter.STL" label="STL"/>
+                </v-col>
+                <v-col cols="1">
+                  <v-checkbox v-model="filter['3MF']" label="3MF"/>
+                </v-col>
+                <v-col cols="1">
+                  <v-checkbox v-model="filter.OBJ" label="OBJ"/>
+                </v-col>
+              </v-row>
+              <v-row>
+                <v-col cols="8">
+                  <v-select v-model="filter.materials" :items="materials" label="Material" multiple chips/>
+                </v-col>
+                <v-col cols="2">
+                  <v-checkbox v-model="filter.searchInCurrentFolder" label="Only search in current folder"/>
+                </v-col>
+              </v-row>
             </v-card>
-          </v-menu>
-          <v-btn icon @click="uploadFile">
-            <v-icon>mdi-upload</v-icon>
-          </v-btn>
-          <v-btn icon @click="createFolder">
-            <v-icon>mdi-folder-plus</v-icon>
-          </v-btn>
-          <v-btn icon @click="toggleView">
-            <v-icon>{{ gridView ? 'mdi-view-list' : 'mdi-view-grid' }}</v-icon>
-          </v-btn>
-        </v-toolbar>
+          </v-expand-transition>
+
+        </v-card>
       </v-col>
     </v-row>
 
     <!-- Main Content -->
     <v-row>
-      <v-col cols="8">
-        <v-row>
-          <v-col
-            v-for="file in files"
-            :key="file.name"
-            cols="12"
-            md="6"
-            lg="4"
-            @click="selectFile(file)"
-            @contextmenu.prevent="openContextMenu($event, file)"
-          >
-            <v-card outlined :class="{ 'v-card--hover': gridView }">
-              <v-img :src="file.preview" :alt="file.name" height="150px"></v-img>
-              <v-card-title>{{ file.name }}</v-card-title>
-              <v-card-subtitle>{{ file.size }}</v-card-subtitle>
+      <v-col :cols="12">
+        <!-- Grid View -->
+        <v-row v-if="gridView">
+          <v-col v-for="(file, index) in files" :key="index" cols="12" lg="4">
+            <v-card class="v-card--hover" style="display: flex; height: 100px;"
+                    @contextmenu.prevent="openContextMenu($event, file)">
+              <div style="display: flex; align-items: center;">
+                <v-img :src="file.preview" :alt="file.name" width="5rem"/>
+                <div>
+                  <v-card-title style="font-size: 14px;">{{ file.name }}</v-card-title>
+                  <v-card-subtitle style="font-size: 12px;">{{ file.size }}</v-card-subtitle>
+                </div>
+              </div>
             </v-card>
           </v-col>
         </v-row>
-      </v-col>
 
-      <!-- File Preview -->
-      <v-col cols="4" v-if="selectedFile">
-        <v-card>
-          <v-card-title>
-            {{ selectedFile.name }}
-            <v-spacer></v-spacer>
-            <v-btn icon @click="selectedFile = null">
-              <v-icon>mdi-close</v-icon>
-            </v-btn>
-          </v-card-title>
-          <v-card-subtitle>{{ selectedFile.size }}</v-card-subtitle>
-          <v-img :src="selectedFile.preview" alt="Preview" height="200px"></v-img>
-          <v-list>
-            <v-list-item>
-              <v-list-item-content>Times printed: {{ selectedFile.timesPrinted }}</v-list-item-content>
-            </v-list-item>
-            <v-list-item>
-              <v-list-item-content>Size: {{ selectedFile.dimensions }}</v-list-item-content>
-            </v-list-item>
-          </v-list>
-          <v-btn @click="addToPrintQueue">Add to print queue</v-btn>
-        </v-card>
+        <!-- List View -->
+        <v-row v-else>
+          <v-col cols="12">
+            <v-data-table
+              :headers="[{ title: 'Name', key: 'name'},{ title: 'Date', key: 'date' },{ title: 'Size', key: 'size' },]"
+              :items="files"
+              item-class="d-flex align-center"
+              :item-clickable="true"
+              @contextmenu.prevent="openContextMenu($event, item)"
+            />
+          </v-col>
+        </v-row>
       </v-col>
     </v-row>
 
     <!-- Context Menu -->
-    <v-menu
-      v-model="contextMenuVisible"
-      :position-x="contextMenu.x"
-      :position-y="contextMenu.y"
-      absolute
-    >
+    <v-menu v-model="contextMenu.visible" style="position: absolute;"
+            :style="{ top: `${contextMenu.y}px`, left: `${contextMenu.x}px` }">
       <v-list>
-        <v-list-item @click="deleteFile(selectedFile)">Delete</v-list-item>
-        <v-list-item @click="downloadFile(selectedFile)">Download</v-list-item>
-        <v-list-item @click="renameFile(selectedFile)">Rename</v-list-item>
-        <v-list-item @click="moveFile(selectedFile)">Move</v-list-item>
-        <v-list-item @click="addToPrintQueue">Add to print queue</v-list-item>
+        <v-list-subheader>{{ contextMenu.file.name }}</v-list-subheader>
+        <v-divider/>
+        <v-list-item @click="deleteFile(contextMenu.file)">
+          <v-icon icon="mdi-delete" class="mr-2"/>
+          Delete
+        </v-list-item>
+        <v-list-item @click="downloadFile(contextMenu.file)">
+          <v-icon icon="mdi-download" class="mr-2"/>
+          Download
+        </v-list-item>
+        <v-list-item @click="renameFile(contextMenu.file)">
+          <v-icon icon="mdi-rename-box" class="mr-2"/>
+          Rename
+        </v-list-item>
+        <v-list-item @click="moveFile(contextMenu.file)">
+          <v-icon icon="mdi-folder-move" class="mr-2"/>
+          Move
+        </v-list-item>
+        <v-list-item @click="addToQueue(contextMenu.file)">
+          <v-icon icon="mdi-playlist-plus" class="mr-2"/>
+          Add to print queue
+        </v-list-item>
       </v-list>
     </v-menu>
   </v-container>
 </template>
+
 
 <script>
 export default {
@@ -127,51 +127,51 @@ export default {
     return {
       search: '',
       gridView: true,
-      filterVisible: false,
-      selectedPrinters: [],
-      filterGCODE: false,
-      filterSTL: false,
-      filter3MF: false,
-      filterOBJ: false,
-      selectedMaterial: null,
-      selectedSlicer: null,
+      filter: {
+        visible: false
+      },
       printers: ['Printer 1', 'Printer 2'],
       materials: ['PLA', 'ABS', 'PETG'],
-      slicers: ['Slicer 1', 'Slicer 2'],
       files: [
         {
           name: 'hairpin.stl',
+          date: '2024-08-14',
           size: '15 MB',
-          preview: 'path-to-preview-image',
+          preview: 'https://cdn.simplyprint.io/i/user/file/69b8bbec34a048ff9b02f396886d07bb.png?v=2',
+          timesPrinted: 0,
+          dimensions: '83 x 127 x 65 mm',
+        },
+        {
+          name: 'hairpin.stl',
+          date: '2024-08-14',
+          size: '15 MB',
+          preview: 'https://cdn.simplyprint.io/i/user/file/69b8bbec34a048ff9b02f396886d07bb.png?v=2',
+          timesPrinted: 0,
+          dimensions: '83 x 127 x 65 mm',
+        },
+        {
+          name: 'hairpin.stl',
+          date: '2024-08-14',
+          size: '15 MB',
+          preview: 'https://cdn.simplyprint.io/i/user/file/69b8bbec34a048ff9b02f396886d07bb.png?v=2',
           timesPrinted: 0,
           dimensions: '83 x 127 x 65 mm',
         },
       ],
-      selectedFile: null,
-      contextMenuVisible: false,
-      contextMenu: {x: 0, y: 0},
+      contextMenu: {
+        visible: false,
+        x: 0,
+        y: 0,
+        file: null,
+      },
     };
   },
   methods: {
-    toggleFilter() {
-      this.filterVisible = !this.filterVisible;
-    },
-    uploadFile() {
-      // Logic to upload file
-    },
-    createFolder() {
-      // Logic to create a new folder
-    },
-    toggleView() {
-      this.gridView = !this.gridView;
-    },
-    selectFile(file) {
-      this.selectedFile = file;
-    },
     openContextMenu(event, file) {
-      this.contextMenuVisible = true;
-      this.contextMenu = {x: event.clientX, y: event.clientY};
-      this.selectedFile = file;
+      this.contextMenu.visible = true;
+      this.contextMenu.x = event.clientX;
+      this.contextMenu.y = event.clientY;
+      this.contextMenu.file = file;
     },
     deleteFile(file) {
       // Logic to delete the file
@@ -185,9 +185,18 @@ export default {
     moveFile(file) {
       // Logic to move the file
     },
-    addToPrintQueue() {
+    addToQueue(file) {
       // Logic to add the file to the print queue
     },
+    closeContextMenu() {
+      this.contextMenu.visible = false;
+    }
+  },
+  mounted() {
+    window.addEventListener('click', this.closeContextMenu);
+  },
+  beforeDestroy() {
+    window.removeEventListener('click', this.closeContextMenu);
   },
 };
 </script>
@@ -195,10 +204,9 @@ export default {
 <style scoped>
 .v-card--hover {
   transition: 0.3s ease-in-out;
-  cursor: pointer;
 }
 
 .v-card--hover:hover {
-  transform: scale(1.05);
+  transform: scale(1.01);
 }
 </style>

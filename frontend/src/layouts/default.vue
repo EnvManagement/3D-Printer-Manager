@@ -17,11 +17,21 @@
       <v-app-bar-nav-icon @click="clientSettings.toggleSidebar"/>
       <v-app-bar-title>3D Printer Management System</v-app-bar-title>
       <v-btn @click="toggleTheme">
-        <v-icon>mdi-theme-light-dark</v-icon>
+        <v-icon icon="mdi-theme-light-dark"/>
       </v-btn>
       <v-btn>
-        <v-icon>mdi-account</v-icon>
-        Dominik Kovacs
+        <v-icon icon="mdi-account"/>
+        {{ $currentUser.firstname }} {{ $currentUser.surname }}
+        <v-menu activator="parent">
+          <v-list>
+            <v-list-item href="/panel/account">
+              <v-list-item-title><v-icon class="mr-2" icon="mdi-account-circle"/>Account</v-list-item-title>
+            </v-list-item>
+            <v-list-item @click="$logout">
+              <v-list-item-title><v-icon class="mr-2" icon="mdi-logout"/>Logout</v-list-item-title>
+            </v-list-item>
+          </v-list>
+        </v-menu>
       </v-btn>
     </v-app-bar>
     <v-main>
@@ -69,12 +79,6 @@ export default {
           gap: '0.5rem'
         },
         {
-          icon: 'mdi-folder-open',
-          text: 'Your Files',
-          link: '/panel/files',
-          gap: '0.5rem'
-        },
-        {
           icon: 'mdi-history',
           text: 'Print History',
           link: '/panel/jobs',
@@ -98,6 +102,11 @@ export default {
   methods: {
     toggleTheme() {
       this.theme.global.name.value = this.theme.global.current.value.dark ? 'light' : 'dark'
+    }
+  },
+  mounted() {
+    if (!this.$currentUser) {
+      this.$router.push('/login')
     }
   }
 }

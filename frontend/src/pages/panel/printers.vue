@@ -5,7 +5,8 @@
       <v-col cols="12">
         <v-card flat>
           <v-card-title class="d-flex justify-content-between align-items-center">
-            <span class="text-center" style="font-size: 2rem;">Ultimaker 2 Go</span>
+            <span style="font-size: 2rem;">Ultimaker 2 Go</span>
+            <v-spacer/>
             <div>
               <v-btn icon="mdi-cog"/>
               <v-btn icon="mdi-refresh"/>
@@ -20,13 +21,11 @@
       <v-col cols="12" md="4">
         <v-card>
           <v-card-title>
-            <v-icon color="red" class="mr-2">mdi-alert-circle</v-icon>
+            <v-icon icon="mdi-alert-circle" color="red" class="mr-2"/>
             Not connected
           </v-card-title>
           <v-card-text class="text-center">
-            <v-img
-              src="https://cdn.simplyprint.io/i/printer_types/ultimaker/2_go/product_photo_md.png?cacheid=60180ee5c2a98"
-              aspect-ratio="1"/>
+            <v-img :src="printer.image" aspect-ratio="1"/>
           </v-card-text>
           <v-card-text>
             <v-btn color="primary" @click="dialog = true">Open Edit Material</v-btn>
@@ -40,11 +39,10 @@
                 </v-card-title>
 
                 <v-card-text>
-
                   <v-form>
                     <h6 class="text-center mb-0 font-weight-bold" style="font-size: 18px;">Assign specific spool</h6>
                     <v-btn-toggle>
-                      <v-btn outlined color="primary" icon="mdi-package-variant-closed">
+                      <v-btn outlined color="primary">
                         <v-icon>mdi-package-variant-closed</v-icon>
                         Pick new spool
                       </v-btn>
@@ -70,13 +68,11 @@
 
       <!-- Control and Temperature Section -->
       <v-col cols="12" md="4">
-
         <!-- Control Section -->
         <v-card>
           <v-card-title>Control</v-card-title>
           <v-spacer/>
           <v-card-text>
-
             <v-row justify="center">
               <v-col>
                 <v-btn block color="primary" class="mb-1" icon="mdi-arrow-up"/>
@@ -107,13 +103,21 @@
 
             <v-row class="mt-10">
               <v-col>
-                <v-text-field label="Change print speed" suffix="%" type="number"></v-text-field>
+                <v-text-field label="Change print speed" suffix="%" type="number">
+                  <template v-slot:append-inner>
+                    <v-btn text="SET"/>
+                  </template>
+                </v-text-field>
               </v-col>
             </v-row>
 
             <v-row>
               <v-col>
-                <v-text-field label="Control flow rate" suffix="%" type="number"></v-text-field>
+                <v-text-field label="Control flow rate" suffix="%" type="number">
+                  <template v-slot:append-inner>
+                    <v-btn text="SET"/>
+                  </template>
+                </v-text-field>
               </v-col>
             </v-row>
           </v-card-text>
@@ -124,7 +128,7 @@
           <v-card-title>Temperatures</v-card-title>
           <v-card-text>
             <v-row>
-              <v-col cols="2">
+              <v-col cols="3">
                 <v-text-field suffix="°" type="number" v-model="printer.nozzleTemperature" readonly/>
               </v-col>
               <v-col>
@@ -148,6 +152,9 @@
       <v-col cols="12" md="4">
         <v-card>
           <v-card-title>Webcam</v-card-title>
+          <v-card-text class="d-flex justify-center">
+            <video :src="streamUrl" autoplay playsinline style="width: 100%; height: auto;"/>
+          </v-card-text>
         </v-card>
       </v-col>
     </v-row>
@@ -160,32 +167,21 @@ export default {
     return {
       dialog: false,
       printer: {
+        streamUrl: null,
+        image: 'https://cdn.simplyprint.io/i/printer_types/ultimaker/2_go/product_photo_md.png?cacheid=60180ee5c2a98',
         nozzleTemperature: 50,
       },
-      sliderValue: 10,
       selectedFilament: '',
-      selectedColor: '#000000', // Default color selection
+      selectedColor: '#000000',
       materialTypes: ['PLA', 'ABS', 'ASA', 'PETG', 'TPU/TPE', 'Nylon', 'Polycarbonate', 'HIPS', 'PVA', 'PMMA'],
       selectedMaterial: null,
-      spoolOptions: ['Create new spool'], // Example dropdown options
-      canSave: false, // Logic for enabling/disabling the save button
     };
-  },
-  methods: {
-    back() {
-      // Handle back button action
-    },
-    showInfo() {
-      // Handle info button action
-    },
   },
 };
 </script>
 
 <style scoped>
-
 .v-btn {
-  border-radius: 4px
+  border-radius: 4px;
 }
-
 </style>
